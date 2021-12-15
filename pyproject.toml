@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "streamlit_stackoverflow"
-version = "0.1.0"
+version = "0.1.1"
 description = "Project created to learning Streamlit."
 authors = ["Joao Corte <jpaulorc@gmail.com>"]
 exclude = ["streamlit_stackoverflow/.git"]

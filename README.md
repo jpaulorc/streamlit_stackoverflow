@@ -1,5 +1,7 @@
 # Stack Overflow Data Analysis
 
+[![GitHub][github_badge]][github_link] [![PyPI][pypi_badge]][pypi_link]
+
 Project used to learning Streamlit.
 
 ## Introduction
@@ -43,3 +45,9 @@ To use, just type in:
 ```bash
 xxxxxxxxxxxxxxxxx --help
 ```
+
+[github_badge]: https://badgen.net/badge/icon/GitHub?icon=github&color=black&label
+[github_link]: https://github.com/jpaulorc/streamlit_stackoverflow
+
+[pypi_badge]: https://badgen.net/pypi/v/streamlit-stackoverflow?icon=pypi&color=black&label
+[pypi_link]: https://pypi.org/project/streamlit-stackoverflow/
