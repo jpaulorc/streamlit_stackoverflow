@@ -10,7 +10,7 @@ Learning to use Streamlit to show charts with Pandas, ...
 
 ### What this project can do
 
-This project will help us to understand some information about Stack Overflow.
+This project will answer some information about Stack Overflow.
 
 These questions will be answered:
 
