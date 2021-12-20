@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt  # type: ignore
-import pandas as pd  # type: ignore
+import matplotlib.pyplot as plt
+import pandas as pd
 import streamlit as st
-from pywaffle import Waffle  # type: ignore
+from pywaffle import Waffle
 
 DATA_URL = (
     "https://drive.google.com/uc?export=download&id=1_FUXeTJgZbmggsbkHtOymoufnYT1HYwM"
