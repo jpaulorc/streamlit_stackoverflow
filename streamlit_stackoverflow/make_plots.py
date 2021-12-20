@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt  # type: ignore
 import pandas as pd  # type: ignore
 import streamlit as st
+from matplotlib import pyplot as plt  # type: ignore
 from pywaffle import Waffle  # type: ignore
 
 DATA_URL = (
