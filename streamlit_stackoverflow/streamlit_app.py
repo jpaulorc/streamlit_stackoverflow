@@ -1,6 +1,6 @@
 import streamlit as st
 
-from streamlit_stackoverflow.make_plots import MakePlots
+from streamlit_stackoverflow.make_plots import MakePlots  # type: ignore
 
 st.set_page_config(layout="wide")
 
