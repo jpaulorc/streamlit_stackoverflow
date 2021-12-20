@@ -1,6 +1,6 @@
 import streamlit as st
 
-from streamlit_stackoverflow.make_plots import MakePlots as mp
+from streamlit_stackoverflow.make_plots import MakePlots  # type: ignore
 
 st.set_page_config(layout="wide")
 
@@ -36,7 +36,7 @@ def display_welcome():
 
 def display_index():
     """Mostra uma barra lateral"""
-
+    mp = MakePlots()
     options = {
         "Welcome": display_welcome,
         "Question 1": mp.display_question_one,
