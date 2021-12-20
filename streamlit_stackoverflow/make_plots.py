@@ -3,12 +3,14 @@ import pandas as pd  # type: ignore
 import streamlit as st
 from pywaffle import Waffle  # type: ignore
 
+DATA_URL = (
+    "https://drive.google.com/uc?export=download&id=1_FUXeTJgZbmggsbkHtOymoufnYT1HYwM"
+)
+
 
 class MakePlots:
     def __init__(self):
-        self.df_survey = pd.read_csv(
-            "dataset/stack-overflow-developer-survey-2021/survey_results_public.csv"
-        )
+        self.df_survey = pd.read_csv(DATA_URL)
 
     def display_question_one(self):
         """Mostrando como usar o streamlit"""
