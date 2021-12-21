@@ -12,7 +12,7 @@ def display_welcome():
     st.subheader("These questions will be answered:")
     st.write(
         """
-        1. Percentagem of respondents who consider themseves professionals, non-professionals, students, hobbyists, etc.
+        1. Percentagem of respondents who consider themselves professionals, non-professionals, students, hobbyists, etc.
         2. Distribution of respondents by location. Which country had the most participation?
         3. What is the respondent's distribution by level of education?
         4. What is the distribution of working time for each type of professional informed in question 1?
@@ -40,6 +40,18 @@ def display_index():
     options = {
         "Welcome": display_welcome,
         "Question 1": mp.display_question_one,
+        "Question 2": mp.display_question_two,
+        "Question 3": mp.display_question_three,
+        "Question 4": mp.display_question_four,
+        "Question 5": mp.display_question_five,
+        "Question 6": mp.display_question_six,
+        "Question 7": mp.display_question_seven,
+        "Question 8": mp.display_question_eight,
+        "Question 9": mp.display_question_nine,
+        "Question 10": mp.display_question_ten,
+        "Question 11": mp.display_question_eleven,
+        "Question 12": mp.display_question_twelve,
+        "Question 13": mp.display_question_thirteen,
     }
 
     with st.container():

@@ -14,7 +14,7 @@ This project will answer some information about Stack Overflow.
 
 These questions will be answered:
 
-1. Percentagem of respondents who consider themseves professionals, non-professionals, students, hobbyists, etc.
+1. Percentagem of respondents who consider themselves professionals, non-professionals, students, hobbyists, etc.
 2. Distribution of respondents by location. Which country had the most participation?
 3. What is the respondent's distribution by level of education?
 4. What is the distribution of working time for each type of professional informed in question 1?
