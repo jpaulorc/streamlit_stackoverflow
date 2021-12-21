@@ -176,13 +176,39 @@ class MakePlots:
             {"EducationLevel": sf_education.index, "Percentage": sf_education.values}
         )
 
-        fig = px.pie(
-            df,
-            values="Percentage",
-            names="EducationLevel",
-            title="The respondent's distribution by level of education",
-        )
-        st.write(fig)
+        col1, col2 = st.columns(2)
+        with col1:
+            df_max = df.loc[df["Percentage"] == df["Percentage"].max()]
+            st.metric(
+                """As we can see most users who answered the questions have Bachelor's Degree with """,
+                f"{''.join(round(df_max['Percentage'], 2).astype(str))}%",
+            )
+            df["Percentage"] = df["Percentage"].round(2)
+            table = go.Figure(
+                data=[
+                    go.Table(
+                        header=dict(
+                            values=list(df.columns),
+                            fill_color="paleturquoise",
+                            align="left",
+                        ),
+                        cells=dict(
+                            values=df.transpose().values.tolist(),
+                            fill_color="lavender",
+                            align="left",
+                        ),
+                    )
+                ]
+            )
+            st.write(table)
+        with col2:
+            fig = px.pie(
+                df,
+                values="Percentage",
+                names="EducationLevel",
+                title="The respondent's distribution by level of education",
+            )
+            st.write(fig)
 
     def display_question_four(self):
         """Display the container of the fourth question"""
@@ -227,11 +253,31 @@ class MakePlots:
                 go.Bar(name="Max", x=branch, y=df_new["max"]),
             ]
         )
-
         fig.update_layout(barmode="group")
+
         col1, col2 = st.columns(2)
         with col1:
-            st.write(fig)
+            df_table = df_new.sort_values(by=["MainBranchSimplified"])
+            df_table = df_table.loc[:, ["MainBranch", "mean", "min", "max"]]
+            df_table = df_table.drop_duplicates(keep="first")
+            df_table["mean"] = df_table["mean"].round(2)
+            table = go.Figure(
+                data=[
+                    go.Table(
+                        header=dict(
+                            values=list(df_table.columns),
+                            fill_color="paleturquoise",
+                            align="left",
+                        ),
+                        cells=dict(
+                            values=df_table.transpose().values.tolist(),
+                            fill_color="lavender",
+                            align="left",
+                        ),
+                    )
+                ]
+            )
+            st.write(table)
         with col2:
             st.write(fig)
 
