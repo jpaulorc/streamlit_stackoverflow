@@ -9,7 +9,8 @@ from pandas.core.frame import DataFrame  # type: ignore
 from pywaffle import Waffle  # type: ignore
 
 DATA_URL = (
-    "https://drive.google.com/uc?export=download&id=1_FUXeTJgZbmggsbkHtOymoufnYT1HYwM"
+    "data/survey_results_public.csv"
+    # "https://drive.google.com/uc?export=download&id=1_FUXeTJgZbmggsbkHtOymoufnYT1HYwM"
 )
 
 
@@ -24,17 +25,11 @@ class MakePlots:
             2: "Distribution of respondents by location. Which country had the most participation?",
             3: "What is the respondent's distribution by level of education?",
             4: "What is the distribution of working time for each type of professional informed in question 1?",
-            5: """Concerning people who work professionally:
-                    1. What is their profession?
-                    2. What is their level of education?
-                    3. What is the company's size of those people who work professionally?""",
+            5: "Concerning people who work professionally:",
             6: "The average salary of respondents?",
             7: "Using the top five countries that have the most respondents, what is the salary of these people?",
             8: "What is the percentage of people who work with Python?",
-            9: """About python:
-                    1. What is the salary level of people working with Python globally?
-                    2. In Brazil, what is the salary level?
-                    3. In the top five countries that have the most respondents, what is the salary level?""",
+            9: "About python:",
             10: "Concerning all respondents, what operating system do they use?",
             11: "Concerning only people who work with Python, what operating system do they use?",
             12: "What is the average age of respondents?",
@@ -42,6 +37,30 @@ class MakePlots:
         }
         st.header(f"Question {question_number}:")
         st.subheader(questions[question_number])
+        if question_number == 5:
+            st.markdown(
+                """
+                1. What is their profession?
+                2. What is their level of education?
+                3. What is the company's size of those people who work professionally?
+                ---
+                """
+            )
+        elif question_number == 9:
+            st.markdown(
+                """
+                1. What is the salary level of people working with Python globally?
+                2. In Brazil, what is the salary level?
+                3. In the top five countries that have the most respondents, what is the salary level?
+                ---
+                """
+            )
+        else:
+            st.markdown(
+                """
+                ---
+                """
+            )
 
     def display_question_one(self):
         """Display the container of the firt question"""
@@ -144,16 +163,14 @@ class MakePlots:
 
             plt.title("Distribution of respondents by location")
 
-            st.pyplot(fig)
+            st.write(fig)
             st.write(
                 "The chart only presents countries with more than one percent of respondents."
             )
 
-    def display_question_three(self):
-        """Display the container of the third question"""
-        self.set_header(question_number=3)
-
-        ed_level = {
+    def set_ed_level_simplified(self) -> dict:
+        """Return a Dictionary containing the education level simplified"""
+        return {
             "Secondary school (e.g. American high school, German Realschule or Gymnasium, etc.)": "Secondary school",
             "Bachelor’s degree (B.A., B.S., B.Eng., etc.)": "Bachelor’s degree",
             "Master’s degree (M.A., M.S., M.Eng., MBA, etc.)": "Master’s degree",
@@ -164,9 +181,13 @@ class MakePlots:
             "Primary/elementary school": "Primary/elementary",
             "Associate degree (A.A., A.S., etc.)": "Associate degree",
         }
+
+    def display_question_three(self):
+        """Display the container of the third question"""
+        self.set_header(question_number=3)
         self.df_survey["EducationLevel"] = (
             self.df_survey["EdLevel"]
-            .apply(lambda x: ed_level.get(x, "Not Informed"))
+            .apply(lambda x: self.set_ed_level_simplified().get(x, "Not Informed"))
             .astype("string")
         )
         sf_education = (
@@ -227,17 +248,18 @@ class MakePlots:
             .astype("string")
         )
         df_new = self.df_survey.loc[
-            :, ["YearsCode", "MainBranch", "MainBranchSimplified"]
+            :, ["YearsCodePro", "MainBranch", "MainBranchSimplified"]
         ]
-        col_numbers = ["YearsCode", "YearsCodePro"]
-        df_new.loc[:, ["YearsCode"]] = df_new.loc[:, ["YearsCode"]].apply(
+        df_new.loc[:, ["YearsCodePro"]] = df_new.loc[:, ["YearsCodePro"]].apply(
             pd.to_numeric, args=("coerce",), axis="index"
         )
-        df_new = df_new.groupby("MainBranchSimplified").apply(
-            lambda x: x.fillna(x.mean())
+        df_new = (
+            df_new.groupby("MainBranchSimplified")
+            .apply(lambda x: x.fillna(x.mean()))
+            .dropna()
         )
         df_new = df_new.join(
-            df_new.groupby("MainBranchSimplified")["YearsCode"].aggregate(
+            df_new.groupby("MainBranchSimplified")["YearsCodePro"].aggregate(
                 ["mean", "min", "max"]
             ),
             on="MainBranchSimplified",
@@ -281,30 +303,179 @@ class MakePlots:
         with col2:
             st.write(fig)
 
+    def set_devtype_group(self) -> dict:
+        """Return a Dictionary containing the dev type grouped by function"""
+        return {
+            "Developer, full-stack": "Dev, full-stack",
+            "Developer, mobile;Developer, front-end;Developer, full-stack;Developer, back-end": "Dev, full-stack, mobile",
+            "Developer, mobile;Developer, full-stack": "Dev, full-stack; mobile",
+            "Developer, back-end": "Dev, back-end",
+            "Developer, front-end": "Dev, front-end",
+            "Developer, front-end;Developer, full-stack;Developer, back-end": "Dev, full-stack",
+            "Developer, front-end;Developer, full-stack": "Dev, full-stack",
+            "Developer, full-stack;Developer, back-end": "Dev, full-stack",
+            "Developer, mobile": "Developer, mobile",
+            "Developer, desktop or enterprise applications": "Dev, desktop",
+            "Developer, desktop or enterprise applications;Developer, back-end": "Dev, desktop",
+            "Developer, front-end;Developer, desktop or enterprise applications;Developer, full-stack;Developer, back-end": "Dev, desktop",
+            "Developer, embedded applications or devices": "Dev, embedded",
+            "Data scientist or machine learning specialist": "Data Scientist",
+            "Developer, desktop or enterprise applications;Developer, full-stack;Developer, back-end": "Dev, desktop",
+            "Other (please specify):": "Other",
+            "Developer, mobile;Developer, front-end": "Dev, mobile; front-end",
+            "Developer, desktop or enterprise applications;Developer, full-stack": "Dev, desktop",
+            "Developer, front-end;Developer, back-end": "Dev, full-stack",
+            "Developer, full-stack;DevOps specialist": "Dev;DevOps",
+            "Developer, back-end;DevOps specialist": "Dev;DevOps",
+            "Engineer, data;Developer, back-end": "Engineer, data",
+            "Engineer, data": "Engineer, data",
+            "Developer, full-stack;Engineering manager": "Dev, full-stack;Eng manager",
+            "Engineering manager": "Engineer manager",
+            "Developer, full-stack;Developer, back-end;DevOps specialist": "Dev;DevOps",
+            "Developer, mobile;Developer, front-end;Developer, desktop or enterprise applications;Developer, full-stack;Developer, back-end": "Dev, full-stack",
+            "Developer, QA or test": "Dev;QA",
+            "Developer, mobile;Developer, front-end;Developer, full-stack": "Dev, full-stack",
+            "Developer, front-end;Developer, full-stack;Developer, back-end;DevOps specialist": "Dev;DevOps",
+            "DevOps specialist": "DevOps",
+            "Developer, mobile;Developer, back-end": "Dev;DevOps",
+            "Developer, desktop or enterprise applications;Developer, embedded applications or devices": "Dev, embedded, desktop",
+            "Developer, game or graphics": "Dev, game or graphics",
+            "Senior Executive (C-Suite, VP, etc.)": "Senior Executive",
+            "Developer, back-end;Engineering manager": "Dev, back-end;Eng manager",
+            "Developer, full-stack;Student": "Dev, full-stack;Student",
+            "Data scientist or machine learning specialist;Developer, back-end": "Data scientist;Dev, back-end",
+            "Developer, full-stack;System administrator": "Dev, full-stack;System adm",
+            "Developer, front-end;Developer, full-stack;Developer, back-end;Designer": "Dev, full-stack;Designer",
+            "Developer, back-end;Developer, embedded applications or devices": "Dev, back-end;embedded",
+            "Developer, mobile;Developer, full-stack;Developer, back-end": "Dev, full-stack",
+            "Academic researcher": "Student",
+            "Developer, front-end;Designer": "Dev, front-end;Designer",
+            "Developer, front-end;Developer, full-stack;Developer, back-end;Database administrator": "Dev, full-stack;System adm",
+            "Developer, full-stack;Other (please specify)": "Dev, full-stack",
+            "Developer, front-end;Developer, desktop or enterprise applications;Developer, back-end": "Dev, back-end;embedded",
+            "Data scientist or machine learning specialist;Data or business analyst": "Data Scientist",
+            "Developer, front-end;Developer, full-stack;Developer, back-end;Developer, QA or test": "Dev;QA",
+            "Developer, full-stack;Senior Executive (C-Suite, VP, etc.)": "Senior Executive",
+            "Other (please specify):;Developer, back-end": "Dev, back-end",
+            "Developer, back-end;Student": "Dev, back-end;Student",
+            "Developer, back-end;DevOps specialist;Engineer, site reliability": "Dev;DevOps",
+            "Developer, front-end;Developer, desktop or enterprise applications": "Dev, front-end, desktop",
+            "Developer, front-end;Developer, full-stack;Developer, back-end;Student": "Dev, full-stack;Student",
+            "Engineer, data;Data scientist or machine learning specialist": "Engineer, data;Data scientist",
+            "Developer, mobile;Developer, front-end;Developer, back-end": "Dev, full-stack, mobile",
+            "Developer, full-stack;Data scientist or machine learning specialist": "Dev, full-stack;Data scientist",
+            "Developer, full-stack;Designer": "Dev, full-stack;Designer",
+            "Developer, back-end;Engineer, site reliability": "Dev, back-end;Engineer",
+            "Developer, full-stack;Product manager": "Dev, full-stack;PM",
+            "Data or business analyst": "Data Scientist",
+        }
+
     def display_question_five(self):
         """Display the container of the fifth question"""
         self.set_header(question_number=5)
 
+        df = self.df_survey.loc[:]
+        df.set_index(keys=["MainBranch"], inplace=True)
+        df = df.loc[["I am a developer by profession"], :]
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("What is their profession?")
+            df1 = df.loc[:]
+            df1 = df1["DevType"].dropna().value_counts(normalize=True) * 100
+            df1 = pd.DataFrame({"DevType": df1.index, "Percentage": df1.values})
+            df1["DevTypeGrouped"] = (
+                df1["DevType"]
+                .apply(lambda x: self.set_devtype_group().get(x, "not_used"))
+                .astype("string")
+            )
+            df1 = df1.loc[df1["DevTypeGrouped"] != "not_used"]
+            df1 = df1.loc[:, ["DevTypeGrouped", "Percentage"]]
+            df1 = (
+                df1.groupby(["DevTypeGrouped"])
+                .sum()
+                .reset_index()
+                .sort_values(by=["Percentage"], ascending=False)
+            )
+            fig = px.bar(
+                df1,
+                y="DevTypeGrouped",
+                x="Percentage",
+                labels={
+                    "DevTypeGrouped": "Professions",
+                    "Percentage": "Percentage(%)",
+                },
+                title="Professions of professional workers ",
+            )
+            st.write(fig)
+
+        with col2:
+            st.subheader("What is their level of education?")
+            df2 = df.loc[:]
+            df2 = df["EdLevel"].dropna().value_counts(normalize=True) * 100
+            df2 = pd.DataFrame({"EdLevel": df2.index, "Percentage": df2.values})
+            df2["EdLevelSimplified"] = (
+                df2["EdLevel"]
+                .apply(
+                    lambda x: self.set_ed_level_simplified().get(x, "Something Else")
+                )
+                .astype("string")
+            )
+
+            fig = px.pie(
+                df2,
+                values="Percentage",
+                names="EdLevelSimplified",
+                title="The professional distribution by level of education",
+                labels={
+                    "EdLevelSimplified": "Education Level",
+                    "Percentage": "Percentage(%)",
+                },
+            )
+            st.write(fig)
+
+        st.subheader(
+            "What is the company's size of those people who work professionally?"
+        )
+        df3 = self.df_survey.loc[:, ["MainBranch", "OrgSize"]]
+        df3.set_index(keys=["MainBranch"], inplace=True)
+        df3 = df3.loc[["I am a developer by profession"], :]
+        just_me = "Just me - I am a freelancer, sole proprietor, etc."
+        df3.loc[df3["OrgSize"] == just_me, "OrgSize"] = "1 employee"
+        df3 = (
+            df3.dropna()
+            .value_counts(subset=["OrgSize"], normalize=False)
+            .reset_index(name="count")
+        )
+
+        fig, ax = plt.subplots()
+        sns.set_theme(style="whitegrid")
+        ax = sns.barplot(x="count", y="OrgSize", data=df3)
+        ax.set(xlabel="Number of employee", ylabel="Company Size")
+        plt.title("Company size of the professional workers")
+        st.write(fig)
+
     def display_question_six(self):
-        pass
+        self.set_header(question_number=6)
 
     def display_question_seven(self):
-        pass
+        self.set_header(question_number=7)
 
     def display_question_eight(self):
-        pass
+        self.set_header(question_number=8)
 
     def display_question_nine(self):
-        pass
+        self.set_header(question_number=9)
 
     def display_question_ten(self):
-        pass
+        self.set_header(question_number=10)
 
     def display_question_eleven(self):
-        pass
+        self.set_header(question_number=11)
 
     def display_question_twelve(self):
-        pass
+        self.set_header(question_number=12)
 
     def display_question_thirteen(self):
-        pass
+        self.set_header(question_number=13)
