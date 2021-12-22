@@ -458,10 +458,20 @@ class MakePlots:
         plt.title("Company size of the professional workers")
         st.write(fig)
 
-    def get_difference(self, a, b):
+    def get_difference(self, a: float, b: float) -> float:
+        """Return the percentage of the difference between the two values.
+
+        Args:
+            a (float): First value used to calculate
+            b (float): Second value used to calculate
+
+        Returns:
+            [float]: The percentage of the difference between the two values.
+        """
         return ((a - b) / b) * 100
 
     def display_question_six(self):
+        """Display the container of the sixth question"""
         self.set_header(question_number=6)
         df_survey_2020 = pd.read_csv(DATA_FILE_2020)
         mean_salary_2021 = self.df_survey["ConvertedCompYearly"].mean()
@@ -482,10 +492,73 @@ class MakePlots:
             )
 
     def display_question_seven(self):
+        """Display the container of the seventh question"""
         self.set_header(question_number=7)
+        df = self.df_survey.loc[:, ["Country", "ConvertedCompYearly"]]
+        df = df.dropna(subset=["ConvertedCompYearly"])
+        sf_country = df["Country"].dropna().value_counts(normalize=False)
+        df_country = (
+            pd.DataFrame({"Country": sf_country.index, "count": sf_country.values})
+            .iloc[0:5]
+            .set_index(keys=["Country"])
+        )
+        df.set_index(keys=["Country"], inplace=True)
+        df = df.loc[df.index & df_country.index]
+        df = df.groupby("Country").mean().reset_index()
+
+        countries = {
+            "Canada": "Canada",
+            "Germany": "Germany",
+            "India": "India",
+            "United Kingdom of Great Britain and Northern Ireland": "UK/N Ireland",
+            "United States of America": "USA",
+        }
+        df["Country"] = df["Country"].apply(lambda x: countries.get(x)).astype("string")
+
+        fig, ax = plt.subplots()
+        sns.set_theme(style="whitegrid")
+        ax = sns.barplot(y="ConvertedCompYearly", x="Country", data=df)
+        ax.set(xlabel="Country", ylabel="Salary")
+        plt.xticks(rotation=30)
+        plt.title("The average salary from top five countries")
+        st.write(fig)
 
     def display_question_eight(self):
         self.set_header(question_number=8)
+        df = self.df_survey.loc[:, ["LanguageHaveWorkedWith"]]
+        df = df.dropna(subset=["LanguageHaveWorkedWith"])
+        sf = df["LanguageHaveWorkedWith"].dropna().value_counts(normalize=False)
+        df = pd.DataFrame({"Language": sf.index, "count": sf.values})
+        all_languages = df["count"].count()
+        python = (
+            df[df["Language"].str.contains("Python")]["count"].count()
+            / all_languages
+            * 100
+        )
+        others = (
+            df[~df["Language"].str.contains("Python")]["count"].count()
+            / all_languages
+            * 100
+        )
+        df2 = pd.DataFrame(
+            [["Python", python], ["Others", others]], columns=["language", "percentage"]
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric(f"Percentage of people who work with Python", f"{python:.2f}%")
+
+        with col2:
+            fig = px.bar(
+                df2,
+                x="language",
+                y="percentage",
+                labels={
+                    "language": "Language",
+                    "percentage": "Percentage",
+                },
+                title="Percentage of people who work with Python",
+            )
+            st.write(fig)
 
     def display_question_nine(self):
         self.set_header(question_number=9)
