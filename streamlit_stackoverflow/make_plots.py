@@ -8,15 +8,17 @@ from numpy.core.fromnumeric import size
 from pandas.core.frame import DataFrame  # type: ignore
 from pywaffle import Waffle  # type: ignore
 
-DATA_URL = (
+DATA_FILE = (
     "data/survey_results_public.csv"
     # "https://drive.google.com/uc?export=download&id=1_FUXeTJgZbmggsbkHtOymoufnYT1HYwM"
 )
 
+DATA_FILE_2020 = "data/survey_results_public_2020.csv"
+
 
 class MakePlots:
     def __init__(self):
-        self.df_survey = pd.read_csv(DATA_URL)
+        self.df_survey = pd.read_csv(DATA_FILE)
 
     def set_header(self, question_number: int):
         """Display the phrase on each page header according to the number of the question"""
@@ -456,8 +458,28 @@ class MakePlots:
         plt.title("Company size of the professional workers")
         st.write(fig)
 
+    def get_difference(self, a, b):
+        return ((a - b) / b) * 100
+
     def display_question_six(self):
         self.set_header(question_number=6)
+        df_survey_2020 = pd.read_csv(DATA_FILE_2020)
+        mean_salary_2021 = self.df_survey["ConvertedCompYearly"].mean()
+        mean_salary_2020 = df_survey_2020["ConvertedComp"].mean()
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric(
+                f"The average salary of 2021",
+                f"{mean_salary_2021:,.2f}",
+                f"{self.get_difference(mean_salary_2021, mean_salary_2020):.2f}%",
+            )
+        with col2:
+            st.metric(
+                f"The average salary of 2020",
+                f"{mean_salary_2020:,.2f}",
+                f"{self.get_difference(mean_salary_2020, mean_salary_2021):.2f}%",
+            )
 
     def display_question_seven(self):
         self.set_header(question_number=7)
