@@ -10,7 +10,7 @@ def display_welcome():
 
     st.header("This project will answer some information about Stack Overflow.")
     st.subheader("These questions will be answered:")
-    st.write(
+    st.markdown(
         """
         1. Percentagem of respondents who consider themselves professionals, non-professionals, students, hobbyists, etc.
         2. Distribution of respondents by location. Which country had the most participation?

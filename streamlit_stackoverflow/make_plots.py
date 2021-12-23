@@ -8,6 +8,9 @@ from numpy.core.fromnumeric import size
 from pandas.core.frame import DataFrame  # type: ignore
 from pywaffle import Waffle  # type: ignore
 
+from question_one import QuestionOne
+from question_two import QuestionTwo
+
 DATA_FILE = (
     "data/survey_results_public.csv"
     # "https://drive.google.com/uc?export=download&id=1_FUXeTJgZbmggsbkHtOymoufnYT1HYwM"
@@ -21,7 +24,11 @@ class MakePlots:
         self.df_survey = pd.read_csv(DATA_FILE)
 
     def set_header(self, question_number: int):
-        """Display the phrase on each page header according to the number of the question"""
+        """Display the phrase on each page header according to the number of the question
+
+        Args:
+            question_number (int): The question number
+        """
         questions = {
             1: "Percentagem of respondents who consider themselves professionals, non-professionals, students, hobbyists, etc.",
             2: "Distribution of respondents by location. Which country had the most participation?",
@@ -66,99 +73,51 @@ class MakePlots:
 
     def display_question_one(self):
         """Display the container of the firt question"""
+
         self.set_header(question_number=1)
-
-        branch = {
-            "I am a developer by profession": "professional",
-            "I code primarily as a hobby": "hobby",
-            "I used to be a developer by profession, but no longer am": "ex-professional",
-            "I am not primarily a developer, but I write code sometimes as part of my work": "adventurer",
-            "I am a student who is learning to code": "student",
-        }
-        self.df_survey["MainBranchSimplified"] = (
-            self.df_survey["MainBranch"]
-            .apply(lambda x: branch.get(x, "not_informed"))
-            .astype("string")
-        )
-        sf_branch = (
-            self.df_survey["MainBranchSimplified"].dropna().value_counts(normalize=True)
-            * 100
-        )
-        df = pd.DataFrame(
-            {"MainBranchSimplified": sf_branch.index, "Percentage": sf_branch.values}
-        )
-
-        fig = plt.figure(
-            FigureClass=Waffle,
-            rows=5,
-            values=df.Percentage,
-            title={"label": "Percentage of respondents by Activity", "loc": "left"},
-            labels=[
-                f"{x.MainBranchSimplified} ({round(x.Percentage, 2)}%)"
-                for x in df.itertuples()
-            ],
-            legend={"loc": "upper left", "bbox_to_anchor": (1, 1)},
-            icons="child",
-            icon_size=18,
-            figsize=(10, 6),
-        )
+        self.question = QuestionOne(self.df_survey)
+        fig = self.question.question_one_chart()
 
         # display the chart
         st.pyplot(fig)
 
         # displys the metric
-        df_main = self.df_survey.loc[:, ["MainBranchSimplified", "MainBranch"]]
-        df_simplified = self.df_survey.loc[:, ["MainBranchSimplified", "MainBranch"]]
-
-        df_main.set_index(keys=["MainBranchSimplified"], inplace=True)
-        df_simplified.set_index(keys=["MainBranch"], inplace=True)
-
-        df_main = df_main["MainBranch"]
-        df_simplified = df_simplified["MainBranchSimplified"]
-
-        for i, j in sf_branch.items():
-            branch = "".join(df_main.get(i, "Not Informed").unique())
-            simplefied_branch = "".join(
-                df_simplified.get(branch, "Not Informed").unique()
-            )
+        for branch, simplefied_branch, value in self.question.question_one_metric(
+            self.df_survey
+        ):
             st.metric(
                 f"{branch} ({simplefied_branch})",
-                f"{j:.2f}%",
+                f"{value:.2f}%",
             )
 
     def display_question_two(self):
         """Display the container of the second question"""
         self.set_header(question_number=2)
-        sf_country = (
-            self.df_survey["Country"].dropna().value_counts(normalize=True) * 100
-        )
-        df = pd.DataFrame(
-            {"Country": sf_country.index, "Percentage": sf_country.values}
-        )
+        self.question2 = QuestionTwo(self.df_survey)
 
         col1, col2 = st.columns(2)
 
         with col1:
-            df_max = df.loc[df["Percentage"] == df["Percentage"].max()]
+            df_max = self.question2.get_max_metric()
             st.metric(
                 f"The country with the highest participation is {''.join(df_max['Country'])} with: ",
                 f"{''.join(round(df_max['Percentage'], 3).astype(str))}%",
             )
 
-            df_bra = df.loc[df["Country"] == "Brazil"]
+            df_bra = self.question2.get_brazil_metric()
             st.metric(
                 f"Brazil has a participation rate of ",
                 f"{''.join(round(df_bra['Percentage'], 3).astype(str))}%",
             )
 
-            df_min = df.loc[df["Percentage"] == df["Percentage"].min()]
+            df_min = self.question2.get_min_metric()
             st.metric(
                 f"{len(df_min['Country'])} countries have the lowest participation with: ",
                 f"{''.join(round(df_min['Percentage'].min(), 3).astype(str))}%",
             )
 
         with col2:
-            df = df.loc[df["Percentage"] > 1]
+            df = self.question2.get_question_chart()
             fig, ax = plt.subplots()
             sns.set_theme(style="whitegrid")
             sns.barplot(x="Percentage", y="Country", data=df)
