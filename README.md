@@ -1,6 +1,6 @@
 # Stack Overflow Data Analysis
 
-[![GitHub][github_badge]][github_link] [![PyPI][pypi_badge]][pypi_link]
+[![GitHub][github_badge]][github_link] [![PyPI][pypi_badge]][pypi_link] [![Streamlit][streamlit_badge]][streamlit_link]
 
 Project used to learning Streamlit.
 
@@ -40,14 +40,11 @@ This project is preferably installed with pipx:
 pipx install streamlit_stackoverflow
 ```
 
-To use, just type in:
-
-```bash
-xxxxxxxxxxxxxxxxx --help
-```
-
 [github_badge]: https://badgen.net/badge/icon/GitHub?icon=github&color=black&label
 [github_link]: https://github.com/jpaulorc/streamlit_stackoverflow
 
 [pypi_badge]: https://badgen.net/pypi/v/streamlit-stackoverflow?icon=pypi&color=black&label
 [pypi_link]: https://pypi.org/project/streamlit-stackoverflow/
+
+[streamlit_badge]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
+[streamlit_link]: https://share.streamlit.io/jpaulorc/streamlit_stackoverflow/main/streamlit_stackoverflow/streamlit_app.py
