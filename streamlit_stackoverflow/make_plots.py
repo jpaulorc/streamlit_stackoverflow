@@ -734,6 +734,69 @@ class MakePlots:
 
     def display_question_twelve(self):
         self.set_header(question_number=12)
+        df = self.df_survey.loc[:, ["Age"]]
+        sf = df["Age"].dropna().value_counts(normalize=True) * 100
+        df = pd.DataFrame({"Age": sf.index, "percentage": sf.values})
+        c1, c2 = st.columns(2)
+
+        with c1:
+            fig = px.bar(
+                df,
+                y="Age",
+                x="percentage",
+                labels={
+                    "Age": "Age",
+                    "percentage": "Percentage",
+                },
+                title="Respondents by age group",
+            )
+            st.write(fig)
+
+        with c2:
+            fig1 = px.scatter(
+                df,
+                x="Age",
+                y="percentage",
+                labels={
+                    "Age": "Age",
+                    "percentage": "Percentage",
+                },
+                title="Respondents by age group",
+            )
+            st.write(fig1)
 
     def display_question_thirteen(self):
         self.set_header(question_number=13)
+        df = self.df_survey.loc[:, ["Age", "LanguageHaveWorkedWith"]].dropna(
+            subset=["LanguageHaveWorkedWith"]
+        )
+        df = df[df["LanguageHaveWorkedWith"].str.contains("Python")]
+        sf = df["Age"].dropna().value_counts(normalize=True) * 100
+        df = pd.DataFrame({"Age": sf.index, "percentage": sf.values})
+        c1, c2 = st.columns(2)
+
+        with c2:
+            fig = px.bar(
+                df,
+                x="Age",
+                y="percentage",
+                labels={
+                    "Age": "Age",
+                    "percentage": "Percentage",
+                },
+                title="Respondents by Age Group concerning only Python",
+            )
+            st.write(fig)
+
+        with c1:
+            fig1 = px.line(
+                df,
+                x="Age",
+                y="percentage",
+                labels={
+                    "Age": "Age",
+                    "percentage": "Percentage",
+                },
+                title="Respondents by Age Group concerning only Python",
+            )
+            st.write(fig1)
