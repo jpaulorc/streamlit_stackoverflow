@@ -562,6 +562,86 @@ class MakePlots:
 
     def display_question_nine(self):
         self.set_header(question_number=9)
+        df = self.df_survey.loc[
+            :, ["ConvertedCompYearly", "Country", "LanguageHaveWorkedWith"]
+        ].dropna(subset=["LanguageHaveWorkedWith"])
+        df = df[df["LanguageHaveWorkedWith"].str.contains("Python")]
+
+        global_mean = df["ConvertedCompYearly"].mean()
+        brazil_mean = df[df["Country"].str.contains("Brazil")][
+            "ConvertedCompYearly"
+        ].mean()
+
+        sf = df["Country"].dropna().value_counts(normalize=False)
+        df1 = (
+            pd.DataFrame({"Country": sf.index, "count": sf.values})
+            .iloc[0:5]
+            .set_index(keys=["Country"])
+        )
+
+        df.set_index(keys=["Country"], inplace=True)
+        df = df.loc[df.index & df1.index]
+        df1 = df.groupby("Country").mean().reset_index()
+
+        countries = {
+            "Canada": "Canada",
+            "Germany": "Germany",
+            "India": "India",
+            "United Kingdom of Great Britain and Northern Ireland": "UK/N Ireland",
+            "United States of America": "USA",
+        }
+        df1["Country"] = (
+            df1["Country"].apply(lambda x: countries.get(x)).astype("string")
+        )
+        df2 = pd.DataFrame(
+            [["Global", global_mean], ["Brazil", brazil_mean]],
+            columns=["Country", "ConvertedCompYearly"],
+        )
+        df3 = df1.loc[:]
+        df1 = df1.append(df2)
+        df1.sort_values(by="ConvertedCompYearly", inplace=True)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric(f"Global Average Salary", f"{global_mean:,.2f}")
+            st.metric(
+                f"Brazil Average Salary",
+                f"{brazil_mean:,.2f}",
+                f"{self.get_difference(brazil_mean, global_mean):,.2f}% Lower than The Global Average",
+            )
+
+            df3["Salary"] = df3["ConvertedCompYearly"].round(2)
+            df3 = df3.loc[:, ["Country", "Salary"]]
+            table = go.Figure(
+                data=[
+                    go.Table(
+                        header=dict(
+                            values=list(df3.columns),
+                            fill_color="paleturquoise",
+                            align="left",
+                        ),
+                        cells=dict(
+                            values=df3.transpose().values.tolist(),
+                            fill_color="lavender",
+                            align="left",
+                        ),
+                    )
+                ]
+            )
+            st.write(table)
+
+        with col2:
+            fig = px.bar(
+                df1,
+                x="Country",
+                y="ConvertedCompYearly",
+                labels={
+                    "Country": "Country",
+                    "ConvertedCompYearly": "Salary",
+                },
+                title="The average salary",
+            )
+            st.write(fig)
 
     def display_question_ten(self):
         self.set_header(question_number=10)
