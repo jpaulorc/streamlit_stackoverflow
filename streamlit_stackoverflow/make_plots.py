@@ -503,7 +503,7 @@ class MakePlots:
             .set_index(keys=["Country"])
         )
         df.set_index(keys=["Country"], inplace=True)
-        df = df.loc[df.index & df_country.index]
+        df = df.loc[df.index.isin(df_country.index)]
         df = df.groupby("Country").mean().reset_index()
 
         countries = {
@@ -514,6 +514,7 @@ class MakePlots:
             "United States of America": "USA",
         }
         df["Country"] = df["Country"].apply(lambda x: countries.get(x)).astype("string")
+        df.sort_values(by="ConvertedCompYearly", inplace=True)
 
         fig, ax = plt.subplots()
         sns.set_theme(style="whitegrid")
@@ -692,6 +693,44 @@ class MakePlots:
 
     def display_question_eleven(self):
         self.set_header(question_number=11)
+        df = self.df_survey.loc[:, ["OpSys", "LanguageHaveWorkedWith"]].dropna(
+            subset=["LanguageHaveWorkedWith"]
+        )
+        df = df[df["LanguageHaveWorkedWith"].str.contains("Python")]
+        sf = df["OpSys"].dropna().value_counts(normalize=True) * 100
+        df = pd.DataFrame({"OpSys": sf.index, "count": sf.values})
+        os = {
+            "Windows": "Windows",
+            "Linux-based": "Linux",
+            "MacOS": "MacOS",
+            "Windows Subsystem for Linux (WSL)": "Windows(WSL)",
+            "Other (please specify):": "Other",
+            "BSD": "BSD",
+        }
+        df["OpSys"] = df["OpSys"].apply(lambda x: os.get(x)).astype("string")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            fig = px.pie(
+                df,
+                values="count",
+                names="OpSys",
+                title="Operating systems used for people who work with Python",
+            )
+            st.write(fig)
+
+        with col2:
+            fig1 = px.bar(
+                df,
+                x="OpSys",
+                y="count",
+                labels={
+                    "OpSys": "Operating Systems",
+                    "count": "Percentage",
+                },
+                title="Operating systems used for people who work with Python",
+            )
+            st.write(fig1)
 
     def display_question_twelve(self):
         self.set_header(question_number=12)
