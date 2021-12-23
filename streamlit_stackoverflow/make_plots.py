@@ -645,6 +645,50 @@ class MakePlots:
 
     def display_question_ten(self):
         self.set_header(question_number=10)
+        df = self.df_survey.loc[:, ["OpSys"]]
+        sf = df["OpSys"].dropna().value_counts(normalize=True) * 100
+        df = pd.DataFrame({"OpSys": sf.index, "count": sf.values})
+        os = {
+            "Windows": "Windows",
+            "Linux-based": "Linux",
+            "MacOS": "MacOS",
+            "Windows Subsystem for Linux (WSL)": "Windows(WSL)",
+            "Other (please specify):": "Other",
+            "BSD": "BSD",
+        }
+        df["OpSys"] = df["OpSys"].apply(lambda x: os.get(x)).astype("string")
+
+        col1, col2 = st.columns(2)
+        with col2:
+            df["Percentage"] = df["count"].round(2)
+            df1 = df.loc[:, ["OpSys", "Percentage"]]
+            table = go.Figure(
+                data=[
+                    go.Table(
+                        header=dict(
+                            values=list(df1.columns),
+                            fill_color="paleturquoise",
+                            align="left",
+                        ),
+                        cells=dict(
+                            values=df1.transpose().values.tolist(),
+                            fill_color="lavender",
+                            align="left",
+                        ),
+                    )
+                ]
+            )
+            st.write(table)
+
+        with col1:
+            fig = px.pie(
+                df,
+                values="count",
+                names="OpSys",
+                title="Operating systems used in the world",
+            )
+            fig.update_layout(legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.8))
+            st.write(fig)
 
     def display_question_eleven(self):
         self.set_header(question_number=11)
