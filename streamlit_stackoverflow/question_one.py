@@ -9,9 +9,7 @@ class QuestionOne:
     def __init__(self, df_survey):
         self.df, self.sf = self.set_general_information(df_survey)
 
-    def set_general_information(
-        self, df_survey: pd.core.frame.DataFrame
-    ) -> tuple[pd.core.frame.DataFrame, pd.core.series.Series]:
+    def set_general_information(self, df_survey: pd.core.frame.DataFrame):
         """Responsible to process all information to use in question one.
 
         Args:
