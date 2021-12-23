@@ -748,7 +748,7 @@ class MakePlots:
                     "Age": "Age",
                     "percentage": "Percentage",
                 },
-                title="Respondents by age group",
+                title="Respondents by Age Group",
             )
             st.write(fig)
 
@@ -761,7 +761,7 @@ class MakePlots:
                     "Age": "Age",
                     "percentage": "Percentage",
                 },
-                title="Respondents by age group",
+                title="Respondents by Age Group",
             )
             st.write(fig1)
 
