@@ -33,6 +33,10 @@ def display_welcome():
         13. Concerning only people who work with Python, what is the average age?"""
     )
 
+    st.markdown(
+        "[![GitHub](https://badgen.net/badge/icon/GitHub?icon=github&color=black&label)](https://github.com/jpaulorc/streamlit_stackoverflow)"
+    )
+
 
 def display_index():
     """Mostra uma barra lateral"""
